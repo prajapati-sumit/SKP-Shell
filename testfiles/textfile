@@ -1,0 +1,27 @@
+everal input files, the output consists of  a  sequence  of  independently  com‐
+              pressed members. To obtain better compression,
+#include <bits/stdc++.h>
+using namespace std;
+
+#define ll long long
+const ll MD = 1e9 + 7;
+const ll MX = 2e5 + 5;
+ll dp[MX][2];
+ll fn(ll i, ll p, vector<int>& a) {
+    if (i == a.size())
+        return 1;
+    ll &ans = dp[i][p];
+    if (ans != -1)
+        return ans;
+    ans = 0;
+    ll sum = 0;
+    for (ll j = i; j < a.size(); j++) {
+        sum += a[j];
+        if (sum % 2 != p) {
+            ans += fn(j + 1, p ^ 1, a);
+            ans %= MD;
+        }
+    }
+    return ans;
+
+}

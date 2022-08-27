@@ -1,0 +1,328 @@
+history 5
+ls
+ls
+mkdir test
+cd test
+ls
+history
+history 2
+cd ../
+rmdir test
+ls
+env
+ls
+cd ../
+ls
+cd ..
+ls
+cd ..
+history
+history 3
+history
+pwd
+history
+ls
+ls
+ls
+ls
+ls
+cd ../
+ls
+cd ../
+ls
+cd ../
+ls
+ls
+ls
+ls
+date
+date
+date
+date
+date
+date
+date
+ls
+date
+date
+date
+touch a.txt
+ls
+vim a.txt
+cat > a.txt
+cat >a.txt
+echo "Hello"
+echo "Hello">a.txt
+pwd | echo
+pwd | echo
+pwd|echo
+ls
+sfjsajfk | fjsai f
+ls
+vim a.txt
+rm a.txt
+pwd
+grep "sumit"
+pwd | grep -c "sumit"
+pwd | grep -c "sumit"
+pwd | grep -c "sumit"
+pwd | grep -c "sumit"
+pwd | grep -c "sumit"
+pwd | grep -c "sumit"
+pwd | grep -c "sumit"
+pwd | grep -c "sumit"
+ps -A
+pwd | grep -c "sumit"
+pwd | grep -c "sumit"
+pwd | grep -c "sumit"
+pwd | grep -c "sumit"
+pwd | grep -c "sumit"
+pwd | grep -c "sumit"
+pwd | grep -c "sumit"
+pwd | grep -c "sumit"
+fprintf(stderr,"ready to execute: %s\n",P->cmd);
+fprintf(stderr,"ready to execute: %s\n",P->cmd);
+pwd | grep -c "sumit"
+pwd | grep -c "sumit"
+fprintf(stderr,"ready to execute: %s\n",P->cmd);
+
+
+
+pwd | grep -c "sumit"
+
+    fprintf(stderr,"ready to execute: %s\n",P->cmd);
+
+pwd | grep -c "sumit"
+
+pwd | grep -c "sumit"
+
+pwd | grep -c "sumit"
+
+pwd | grep -c "sumit"
+
+pwd | grep -c "sumit"
+
+pwd
+
+pwd | grep -c "sumit"
+
+pwd
+
+ls
+
+touch a.txt
+
+vim a.txt
+
+grep sumit a.txt
+
+grep -c sumit a.txt
+
+pwd | grep -c sumit
+
+pwd | grep -c "sumit
+
+pwd | grep -c "sumit"
+
+grep -c "sumit" a.txt
+
+grep -c "sumit" a.txt
+
+grep -c "sumit" a.txt
+
+grep -c "sumit" a.txt
+
+grep -c "sumit" a.txt | grep "2"
+
+grep -c "sumit" a.txt | grep -c "2"
+
+ls
+
+echo $USER
+
+whoami
+
+pwd
+
+grep -c "sumit" a.txt
+
+pwd | grep -c "sumit" a.txt
+
+pwd | grep -c "sumit"
+
+pwd | grep -c "sumit" a.txt
+
+pwd | grep -c "sumit" | grep -c "1"
+
+cat textfile
+
+cat textfile
+
+touch textfile
+
+vim textfile
+
+cat textfile | gzip -c
+
+gzip textfile
+
+gzip -L tex textfile.gz
+
+cat textfile
+
+ls
+
+rm textfile
+
+rm textfile.gz
+
+vim textfile
+
+cat textfile | head -n 10 | tail -n 3
+
+history.txt | tail -5
+history
+history | tail -5
+
+history
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+history
+
+ls
+
+ls
+
+cat textfile | gzip -c | gunzip -c | tail -n 10
+
+man cd
+
+man ls
+
+man pwd
+
+man ls
+
+env
+
+./shell
+
+./shell
+
+./shell
+
+./shell
+
+./shell
+
+touch test.cpp
+
+vim test.cpp
+
+gcc test.cpp -o test
+
+vim test.cpp
+
+gcc test.cpp -o test
+
+gcc test.cpp -o test
+
+vim test.cpp
+
+gcc test.cpp -o test
+
+./test
+
+./shell
+
+./test
+
+./test &
+
+ls ../
+
+./test
+
+./test &
+
+gcc test.c -o test && ./test
+
+ls
+
+ls
+
+ls
+
+l
+
+how 
+
+whoami
+
+pwd
+
+ls
+
+mkdir ./nothing
+
+ls
+
+cd ../
+
+ls
+
+rmdir nothing
+
+exit
+
+exit
+
+exit
+
+exit
+
+exit
+
+exit
+
+exit
+
+exit
+
+exit
+
+exit
+
+pwd | grep -c "sumit" | wc
+
+explorer.exe .
+
+ls
+
+ls
+
+rmdir thisfiledoesntexist
+
+pwd | grep -o "/" | wc -l
+
