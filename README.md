@@ -18,7 +18,7 @@
 
 2. The prompt for taking the next command displays the `username`, `hostname` and the `present working directory`.
 
-3. SKP provides option to run processes in background using by appeding `&` to the end of your command.
+3. SKP provides option to run processes in background by appeding `&` to the end of your command.
 
 4. Piping is provided and handled manually from scratch.
 

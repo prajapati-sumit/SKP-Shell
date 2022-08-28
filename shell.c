@@ -1,13 +1,22 @@
+/*
+ *	Author	: Sumit Kumar Prajapati
+ *	E-mail 	: prajapati.3@iitj.ac.in
+ *	Roll no.: B20CS074
+ */
+
 #include <ctype.h>
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <grp.h>
+#include <pwd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <time.h>
 #include <unistd.h>
 
 #define MAX_BUF_LEN 1024
@@ -37,9 +46,12 @@ char cmdline[MAX_BUF_LEN];
 char cwd[MAX_BUF_LEN];
 char** envVars;
 FILE* hist;
+FILE* readStream;
 int exitCode;
+int batchMode;
+int backgroundMode;
 
-void printIntro() {
+void init() {
     exitCode = 0;
     fprintf(stdout, "\t\t\tWelcome to " MAGENTA "SKP-Shell\t\t\t\n\n" WHITE);
 }
@@ -60,7 +72,8 @@ void printPrompt() {
     if (errHost) strcpy(hostName, "");
     if (exitCode == 0)
         fprintf(stdout,
-                MAGENTA "%s@%s " YELLOW CYAN "|" YELLOW " %s" GREEN" :)\n" WHITE,
+                MAGENTA "%s@%s " YELLOW CYAN "|" YELLOW " %s" GREEN
+                        " :)\n" WHITE,
                 userName, hostName, cwd);
     else
         fprintf(stdout,
@@ -105,6 +118,11 @@ void processInput(char s[]) {
     if (strcmp(tmp, "") == 0) {
         return;
     }
+    if (tmp[strlen(tmp) - 1] == '&') {
+        backgroundMode = 1;
+        tmp[strlen(tmp) - 1] = '\0';
+    } else
+        backgroundMode = 0;
     nProcess = 0;
     while ((tmp = strtok(tmp, PIPE_DELIM)) != NULL) {
         procs[nProcess++].cmdline = tmp;
@@ -135,18 +153,13 @@ void updateHistory(char s[]) {
     fprintf(hist, "%s\n", cmdline);
     fclose(hist);
 }
-
-int execProcess(struct Process* P) {
+int execInteralCommands(struct Process* P) {
     if (strcmp(P->cmd, "clear") == 0) {
         if (P->nargs > 1) {
             fprintf(stderr, "unknown option '%s'\n", P->args[1]);
             return 1;
         }
         system("clear");
-    } else if (strcmp(P->cmd, "env") == 0) {
-        for (int i = 0; *(envVars + i) != NULL; i++)
-            fprintf(stdout, "\n%s", *(envVars + i));
-
     } else if (strcmp(P->cmd, "cd") == 0) {
         if (P->nargs < 2) {
             fprintf(stderr, "%s: too few arguments\n", P->cmd);
@@ -161,6 +174,21 @@ int execProcess(struct Process* P) {
                     P->args[1]);
             return 1;
         }
+    } else if (strcmp(P->cmd, "exit") == 0) {
+        if (P->nargs > 1) {
+            fprintf(stderr, "%s: too many arguments\n", P->cmd);
+            return 1;
+        }
+        exit(0);
+    } else
+        return -1;
+    return 0;
+}
+
+int execProcess(struct Process* P) {
+    if (strcmp(P->cmd, "env") == 0) {
+        for (int i = 0; *(envVars + i) != NULL; i++)
+            fprintf(stdout, "\n%s", *(envVars + i));
     } else if (strcmp(P->cmd, "pwd") == 0) {
         if (P->nargs > 1) {
             fprintf(stderr, "%s: too many arguments\n", P->cmd);
@@ -202,10 +230,11 @@ int execProcess(struct Process* P) {
             }
         }
     } else if (strcmp(P->cmd, "ls") == 0) {
-        if (P->nargs == 1) strcpy(P->args[P->nargs++], ".");
         char dirPath[MAX_BUF_LEN];
         int lOption = 0;
-        if (strcmp(P->args[1], "-l") == 0) {
+        if (P->nargs == 1) {
+            strcpy(dirPath, ".");
+        } else if (strcmp(P->args[1], "-l") == 0) {
             lOption = 1;
             if (P->nargs == 2)
                 strcpy(dirPath, ".");
@@ -223,13 +252,38 @@ int execProcess(struct Process* P) {
             return 1;
         }
         struct dirent* entity;
-
+        struct stat mystat;
         while ((entity = readdir(dir)) != NULL) {
             if (entity->d_name[0] == '.') continue;
-            if (entity->d_type == DT_DIR)
-                fprintf(stdout, BLUE "%s\n" WHITE, entity->d_name);
-            else
-                fprintf(stdout, GREEN "%s\n" WHITE, entity->d_name);
+            if (lOption) {
+                char buff[100000];
+                sprintf(buff, "%s/%s", dirPath, entity->d_name);
+                stat(buff, &mystat);
+                printf("%c%c%c%c%c%c%c%c%c%c",
+                       S_ISDIR(mystat.st_mode) ? 'd' : '-',
+                       (mystat.st_mode & S_IRUSR) ? 'r' : '-',
+                       (mystat.st_mode & S_IWUSR) ? 'w' : '-',
+                       (mystat.st_mode & S_IXUSR) ? 'x' : '-',
+                       (mystat.st_mode & S_IRGRP) ? 'r' : '-',
+                       (mystat.st_mode & S_IWGRP) ? 'w' : '-',
+                       (mystat.st_mode & S_IXGRP) ? 'x' : '-',
+                       (mystat.st_mode & S_IROTH) ? 'r' : '-',
+                       (mystat.st_mode & S_IWOTH) ? 'w' : '-',
+                       (mystat.st_mode & S_IXOTH) ? 'x' : '-');
+                struct passwd* pw = getpwuid(mystat.st_uid);
+                struct group* gr = getgrgid(mystat.st_gid);
+                char date[100];
+                strftime(date, 50, "%b  %d  %I: %M",
+                         gmtime(&(mystat.st_ctime)));
+                printf(" %5d %10s %10s %10lld  %10s  %s\n",
+                       (int)mystat.st_nlink, pw->pw_name, gr->gr_name,
+                       (long long int)mystat.st_size, date, entity->d_name);
+            } else {
+                if (entity->d_type == DT_DIR)
+                    fprintf(stdout, BLUE "%s\n" WHITE, entity->d_name);
+                else
+                    fprintf(stdout, GREEN "%s\n" WHITE, entity->d_name);
+            }
         }
         closedir(dir);
     } else if (strcmp(P->cmd, "history") == 0) {
@@ -244,18 +298,17 @@ int execProcess(struct Process* P) {
             return 1;
         }
         char line[MAX_BUF_LEN];
-        int numLines = P->nargs == 2 ? toInt(P->args[1]) : -1;
-        int lineNum = 1;
-        while (fgets(line, MAX_BUF_LEN, hist) && numLines-- != 0) {
-            fprintf(stdout, "%d %s", lineNum++, line);
+        int lineNum = 0;
+        char histories[MAX_BUF_LEN][MAX_BUF_LEN];
+        while (fgets(line, MAX_BUF_LEN, hist)) {
+            strcpy(histories[lineNum++], line);
         }
+        int numLines = P->nargs == 2 ? toInt(P->args[1]) : lineNum;
+        for (int i = (lineNum - numLines >= 0 ? lineNum - numLines : 0);
+             i < lineNum; i++)
+            fprintf(stdout, "%d %s", i + 1, histories[i]);
+
         fclose(hist);
-    } else if (strcmp(P->cmd, "exit") == 0) {
-        if (P->nargs > 1) {
-            fprintf(stderr, "%s: too many arguments\n", P->cmd);
-            return 1;
-        }
-        exit(0);
     } else {
         char* tmpargs[P->nargs + 1];
         for (int i = 0; i < P->nargs; i++) {
@@ -271,7 +324,6 @@ int execProcess(struct Process* P) {
 
     return 0;
 }
-int initProcess(struct Process* P, int inFd, int outFd) {}
 void closeAllFileDescriptors(int nPipes, int fd[][2]) {
     for (int i = 0; i < nPipes; i++) {
         close(fd[i][0]);
@@ -279,10 +331,12 @@ void closeAllFileDescriptors(int nPipes, int fd[][2]) {
     }
 }
 int execCommands() {
-    if(strcmp(procs[0].cmd,"exit")==0){
-        exit(0);
+    if (strcmp(cmdline, "") == 0) return 0;
+    int internalCommandStatus = execInteralCommands(&procs[0]);
+    if (internalCommandStatus != -1) {
+        return internalCommandStatus;
     }
-    int status;
+    int status = 0;
     // creating the necessary pipes
     // creating minimum of 1 pipe to make the code clean.
     int nPipes = nProcess == 1 ? 1 : nProcess - 1;
@@ -294,8 +348,10 @@ int execCommands() {
             return 1;
         }
     }
+
     for (int i = 0; i < nProcess; i++) {
         int pid = fork();
+
         if (pid == -1) {
             fprintf(stderr, "error forking child for '%s'\n", procs[i].cmd);
             break;
@@ -307,16 +363,17 @@ int execCommands() {
             closeAllFileDescriptors(nPipes, fd);
             int status = execProcess(&procs[i]);
             exit(status);
-        }
-        if (i != 0) {
-            close(fd[i - 1][0]);
-        }
-        if (i != nProcess - 1) {
-            close(fd[i][1]);
-        }
-        waitpid(pid, &status, 0);
-        if (status != 0) {
-            break;
+        } else {
+            if (i != 0) {
+                close(fd[i - 1][0]);
+            }
+            if (i != nProcess - 1) {
+                close(fd[i][1]);
+            }
+            if (!backgroundMode) waitpid(pid, &status, 0);
+            if (status != 0) {
+                break;
+            }
         }
     }
 
@@ -324,15 +381,34 @@ int execCommands() {
 }
 
 int main(int argc, char* argv[], char* envp[]) {
-    printIntro();
+    init();
+    if (argc == 1) {
+        batchMode = 0;
+        readStream = stdin;
+    }
+    if (argc == 2) {
+        batchMode = 1;
+        readStream = fopen(argv[1], "r+");
+        if (readStream == NULL) {
+            fprintf(stderr, "error opening '%s'\n", argv[1]);
+            return 1;
+        }
+    } else if (argc > 2) {
+        fprintf(stderr, "too many arguments for batch mode.\n");
+        return 1;
+    }
     char* tmp;
     envVars = envp;
-    do {
-        printPrompt();
-        tmp = fgets(cmdline, sizeof(cmdline), stdin);
+    char buff[MAX_BUF_LEN];
+    printPrompt();
+    while (fgets(buff, MAX_BUF_LEN, readStream)) {
+        buff[strcspn(buff, "\n")] = 0;
+        strcpy(cmdline, buff);
         processInput(cmdline);
-        updateHistory(cmdline);
         exitCode = execCommands();
         fprintf(stdout, "\n");
-    } while (tmp);
+        updateHistory(cmdline);
+        printPrompt();
+    }
+    if (batchMode) fclose(readStream);
 }
