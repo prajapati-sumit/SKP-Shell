@@ -50,9 +50,14 @@ FILE* readStream;
 int exitCode;
 int batchMode;
 int backgroundMode;
+char* historyPath;
 
 void init() {
     exitCode = 0;
+    if ((historyPath = getenv("HOME")) == NULL) {
+        historyPath = getpwuid(getuid())->pw_dir;
+    }
+    strcat(historyPath, "/.skp_history");
     fprintf(stdout, "\t\t\tWelcome to " MAGENTA "SKP-Shell\t\t\t\n\n" WHITE);
 }
 void printPrompt() {
@@ -144,8 +149,8 @@ void updateHistory(char s[]) {
     if (strcmp(s, "") == 0) {
         return;
     }
-    hist = fopen("/home/sumit/Documents/OS/Lab1/Part2/SKP-Shell/history.txt",
-                 "a+");
+
+    hist = fopen(historyPath, "a+");
     if (hist == NULL) {
         fprintf(stderr, "error opening history file\n");
         return;
@@ -291,8 +296,7 @@ int execProcess(struct Process* P) {
             fprintf(stderr, "%s: too many arguments\n", P->cmd);
             return 1;
         }
-        hist = fopen(
-            "/home/sumit/Documents/OS/Lab1/Part2/SKP-Shell/history.txt", "a+");
+        hist = fopen(historyPath, "a+");
         if (hist == NULL) {
             fprintf(stderr, "error opening history file\n");
             return 1;
