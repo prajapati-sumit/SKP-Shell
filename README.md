@@ -101,7 +101,7 @@
 1. Arrow keys for command-recall
 2. <kbd>Tab</kbd> for auto completion
 3. `stdout/stdin/stderr redirection` using `<`and `>`.
-4. Support multiple commands separted by `:`;
+4. Support multiple commands separted by `;`.
 5. Chaining of commands using logical operators like `AND`, `OR`,etc.
 6. Aliasing <br>
 
