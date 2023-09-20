@@ -74,7 +74,7 @@
 
 ## Executional Details
 
-1.  Any command ending with `&` is treated as a background process the shell does not wait for its execution. If such a process requests terminal control, it will automatically suspended in the background. The shell keeps track of all background processes and alerts the user on their completion.
+1.  Any command ending with `&` is treated as a background process the shell does not wait for its execution. If such a process requests terminal control, it will be automatically suspended in the background. The shell keeps track of all background processes and alerts the user on their completion.
 
 2.  <kbd>|</kbd> is used for piping of commands, i.e, `stdout` of one command serves as `stdin` for the next. <br>
     Example:
